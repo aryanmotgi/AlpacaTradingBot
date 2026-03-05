@@ -68,30 +68,8 @@ def _today_et():
 
 
 def _is_market_day() -> bool:
-    """True if today is a trading day (weekday + not a market holiday)."""
-    today = _today_et()
-    # Weekend check
-    if today.weekday() >= 5:
-        return False
-    # Check Alpaca trading calendar for holidays
-    try:
-        from data.market_data import _get_api
-        api = _get_api()
-        cal = api.get_calendar(start=today.isoformat(), end=today.isoformat())
-        if not cal:
-            return False
-        cal_date = getattr(cal[0], "date", None)
-        if cal_date is not None:
-            if hasattr(cal_date, "date"):
-                cal_date = cal_date.date()
-            elif isinstance(cal_date, str):
-                from datetime import date as _date
-                cal_date = _date.fromisoformat(cal_date)
-            return cal_date == today
-        return True
-    except Exception as e:
-        logger.debug("Calendar check failed (%s), falling back to weekday check", e)
-        return True  # if calendar API fails, at least weekday check passed
+    """True if today is a trading day (weekday)."""
+    return _today_et().weekday() < 5
 
 
 def boot() -> bool:
